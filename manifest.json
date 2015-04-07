@@ -1,0 +1,32 @@
+{
+  "manifest_version": 2,
+
+  "name": "Chrome Bitcoin Contributor",
+  "description": "Contribute bitcoin to your favourite sites, automatically",
+  "version": "0.0",
+
+  "page_action": {
+    "default_icon": "resources/btc-logo.png",
+    "default_popup": "resources/popup.html"
+  },
+  "permissions": [
+    "webNavigation"
+  ],
+  "background": {
+    "scripts": [
+      "src/extension.js",
+      "src/eventPage.js"
+    ],
+    "persistent": false
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*/*"
+      ],
+      "js": [
+        "scripts/detector.js"
+      ]
+    }
+  ]
+}
