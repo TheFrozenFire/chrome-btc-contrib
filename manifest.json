@@ -4,18 +4,26 @@
   "name": "Chrome Bitcoin Contributor",
   "description": "Contribute bitcoin to your favourite sites, automatically",
   "version": "0.0",
-
+  "options_ui": {
+    "page": "resources/options.html",
+    "chrome_style": true
+  },
   "page_action": {
     "default_icon": "resources/btc-logo.png",
     "default_popup": "resources/popup.html"
   },
   "permissions": [
-    "webNavigation"
+    "webNavigation",
+    "storage",
+    "identity",
+    "https://www.coinbase.com/oauth/authorize",
+    "https://www.coinbase.com/oauth/token"
   ],
   "background": {
     "scripts": [
       "src/extension.js",
-      "src/eventPage.js"
+      "src/eventPage.js",
+      "config.js"
     ],
     "persistent": false
   },
