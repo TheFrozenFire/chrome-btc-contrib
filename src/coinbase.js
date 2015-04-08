@@ -52,6 +52,37 @@ var coinbaseClient;
         });
     };
     
+    proto.post = function(path, body, callback) {
+        var url = this.config.api_url + path,
+            request;
+        
+        this.retrieveToken(function(access_token) {
+            var encodedParams = [],
+                params;
+            
+            params = {
+                access_token: access_token
+            };
+            
+            for(var i in params) {
+                encodedParams.push(encodeURIComponent(i) + '=' + encodeURIComponent(params[i]));
+            }
+            
+            url += '?' + encodedParams.join('&');
+        
+            request = new XMLHttpRequest();
+            request.open('POST', url, true);
+            
+            request.onreadystatechange = function() {
+                if(request.readyState == 4) {
+                    callback(JSON.parse(request.responseText));
+                }
+            };
+            
+            request.send(JSON.stringify(body));
+        });
+    };
+    
     proto.retrieveToken = function(callback, fallback) {
         var self = this;
     
