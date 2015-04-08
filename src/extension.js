@@ -16,8 +16,7 @@ var chromeBtcContrib;
     proto.chrome = null;
     proto.coinbase = null;
     
-    proto.config = {
-    };
+    proto.config = {};
     
     proto.initialize = function() {
         var self = this;
@@ -26,6 +25,26 @@ var chromeBtcContrib;
         chrome.webNavigation.onCompleted.addListener(function(details) {
             self.navigated(details);
         });
+        
+        chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
+            switch(message.sender) {
+                case 'popup':
+                    self.handlePopupMessage(message, sendResponse);
+                    break;
+            }
+            
+            return true;
+        });
+    };
+    
+    proto.handlePopupMessage = function(message, sendResponse) {
+        switch(message.method) {
+            case 'account':
+                this.coinbase.get('/users/self', {}, function(response) {
+                    sendResponse(response);
+                });
+                break;
+        }
     };
     
     proto.navigated = function(details) {

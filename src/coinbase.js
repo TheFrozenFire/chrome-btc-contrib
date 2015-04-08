@@ -20,21 +20,58 @@ var coinbaseClient;
         scope: []
     };
     
-    proto.retrieveToken = function(callback) {
+    proto.get = function(path, params, callback) {
+        var url = this.config.api_url + path,
+            request;
+        
+        if(typeof params !== 'object') {
+            params = {};
+        }
+        
+        this.retrieveToken(function(access_token) {
+            var encodedParams = [];
+            
+            params.access_token = access_token;
+            
+            for(var i in params) {
+                encodedParams.push(encodeURIComponent(i) + '=' + encodeURIComponent(params[i]));
+            }
+            
+            url += '?' + encodedParams.join('&');
+        
+            request = new XMLHttpRequest();
+            request.open('GET', url, true);
+            
+            request.onreadystatechange = function() {
+                if(request.readyState == 4) {
+                    callback(JSON.parse(request.responseText));
+                }
+            };
+            
+            request.send();
+        });
+    };
+    
+    proto.retrieveToken = function(callback, fallback) {
         var self = this;
     
         this.chrome.storage.sync.get({
             coinbase_auth_token: null,
-            coinbase_refresh_token: null 
+            coinbase_refresh_token: null,
+            coinbase_auth_expiry: null
         }, function(data) {
+            if(data.coinbase_auth_expiry === null || data.coinbase_auth_expiry <= Date.now()) {
+                data.coinbase_auth_token = null;
+            }
+        
             if(data.coinbase_auth_token !== null) {
                 callback(data.coinbase_auth_token);
             } else if(data.coinbase_refresh_token !== null) {
                 self.obtainToken(data.coinbase_refresh_token, 'refresh_token', callback, function() {
-                    self.runOAuth(callback);
+                    self.runOAuth(callback, fallback);
                 });
             } else {
-                self.runOAuth(callback);
+                self.runOAuth(callback, fallback);
             }
         });
     };
@@ -42,12 +79,17 @@ var coinbaseClient;
     proto.storeToken = function(access_token, refresh_token) {
         this.chrome.storage.sync.set({
             coinbase_auth_token: access_token,
-            coinbase_refresh_token: refresh_token
+            coinbase_refresh_token: refresh_token,
+            coinbase_auth_expiry: Date.now() + (115 * 60 * 1000)
         });
     };
     
     proto.deleteToken = function() {
-        this.chrome.storage.sync.remove(['coinbase_auth_token', 'coinbase_refresh_token']);
+        this.chrome.storage.sync.remove([
+            'coinbase_auth_token',
+            'coinbase_refresh_token',
+            'coinbase_auth_expiry'
+        ]);
     };
     
     proto.runOAuth = function(callback, fallback) {
