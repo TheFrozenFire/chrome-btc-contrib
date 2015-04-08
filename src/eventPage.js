@@ -1,8 +1,11 @@
-var extension;
+var extension,
+    coinbase;
 
 (function() {
     'use strict';
     
-    extension = new chromeBtcContrib(chrome);
+    coinbase = new coinbaseClient(chrome);
+    
+    extension = new chromeBtcContrib(chrome, coinbase);
     extension.initialize();
 }) ();

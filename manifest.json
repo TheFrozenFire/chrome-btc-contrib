@@ -22,6 +22,7 @@
   "background": {
     "scripts": [
       "src/extension.js",
+      "src/coinbase.js",
       "src/eventPage.js",
       "config.js"
     ],
